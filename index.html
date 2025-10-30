@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Examen Economía de la Empresa - UDAL</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap');
+        
+        :root {
+            --primary-blue: #0d47a1;
+            --secondary-blue: #1976d2;
+            --accent-red: #b71c1c; /* Rojo Negocios */
+            --secondary-red: #d32f2f;
+            --background-color: #f0f2f5;
+            --text-color-dark: #1a2b4b;
+            --text-color-light: #5a6a85;
+            --valid-color: #2e7d32;
+            --invalid-color: #c62828;
+            --warning-color: #ff8f00; 
+        }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background-color: var(--background-color);
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        /* --- Estilos del Hub --- */
+        .hub-container {
+            background-color: #ffffff;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 600px; 
+            text-align: center;
+            margin: 20px auto;
+            position: relative;
+        }
+
+        .header-logo { max-width: 180px; margin-bottom: 20px; }
+        h1.hub-title { color: var(--text-color-dark); font-weight: 700; margin-bottom: 5px; }
+        p.subtitle { color: var(--text-color-light); margin-bottom: 30px; font-size: 1.1em; }
+
+        .exam-grid-container {
+            display: grid;
+            grid-template-columns: 1fr; 
+            gap: 15px;
+            margin-top: 30px;
+        }
+        .exam-card {
+            padding: 20px;
+            border-radius: 15px;
+            color: white;
+            font-weight: 600;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100px;
+            text-decoration: none; 
+        }
+        .exam-card:hover { transform: scale(1.05); box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2); }
+        .exam-card span { display: block; }
+        .exam-card .version-tag { font-size: 0.7em; opacity: 0.8; margin-top: 5px; background-color: rgba(0,0,0,0.2); padding: 2px 8px; border-radius: 10px; }
+        
+        /* Color Negocios */
+        .exam-card.area-negocios { background: linear-gradient(145deg, var(--accent-red), var(--secondary-red)); }
+
+        /* --- Estilos Generales del Examen --- */
+        .exam-page { display: none; }
+        .main-container { width: 95%; max-width: 1400px; margin: 20px auto; display: flex; flex-direction: column; align-items: center; }
+        .header h1 { color: var(--text-color-dark); margin: 0; font-size: 2.2rem; font-weight: 700; text-align: center;}
+        .student-info { display: flex; flex-wrap: wrap; gap: 15px; margin-bottom: 25px; background: #ffffff; padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.07); justify-content: center; width: 100%; box-sizing: border-box; }
+        .student-info input { border: 1px solid #ccc; border-radius: 8px; padding: 10px 15px; font-size: 1rem; }
+        .progress-container { width: 100%; background-color: #e0e0e0; border-radius: 25px; margin-bottom: 25px; height: 20px; box-shadow: inset 0 1px 3px rgba(0,0,0,0.1); }
+        .progress-bar { width: 0%; height: 100%; background-color: var(--accent-red); border-radius: 25px; transition: width 0.4s ease-in-out; text-align: center; line-height: 20px; color: white; font-size: 0.8rem; } /* Color */
+        .exam-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px; width: 100%; }
+        .question-card { background-color: #ffffff; border-radius: 12px; border: 1px solid #e0e0e0; padding: 20px; display: flex; flex-direction: column; justify-content: space-between; transition: all 0.3s ease; min-height: 320px; }
+        .question-card.unanswered-highlight { border-color: var(--invalid-color); box-shadow: 0 0 10px rgba(220, 53, 69, 0.4); }
+        .question-header { font-weight: 700; color: var(--text-color-dark); font-size: 1.1em; margin-bottom: 10px; text-align: center; }
+        .question-text { font-size: 1em; text-align: center; margin-bottom: 15px; flex-grow: 1; display: flex; align-items: center; justify-content: center; line-height: 1.5; }
+        
+        .options { display: flex; flex-direction: column; gap: 8px; }
+        .option { background-color: #f8f9fa; border: 1px solid #dee2e6; padding: 12px; border-radius: 8px; font-size: 0.9em; text-align: center; cursor: pointer; transition: all 0.2s; }
+        .option.selected { background-color: var(--secondary-red); color: white; border-color: var(--accent-red); } /* Color */
+        .option.valid { background-color: var(--valid-color) !important; color: white; border-color: var(--valid-color); }
+        .option.invalid { background-color: var(--invalid-color) !important; color: white; border-color: var(--invalid-color); }
+        
+        .action-btn { 
+            margin-top: 30px; 
+            padding: 15px 30px; 
+            font-size: 1.2em; 
+            font-weight: 700; 
+            color: #fff; 
+            background: linear-gradient(45deg, var(--secondary-red), var(--accent-red)); /* Color */
+            border: none; 
+            border-radius: 8px; 
+            cursor: pointer; 
+            transition: transform 0.2s, box-shadow 0.2s, background 0.3s; 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1); 
+        }
+        .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(183, 28, 28, 0.3); /* Color */
+        }
+        .action-btn.ready-to-submit {
+            background: linear-gradient(45deg, #1b5e20, #43a047); 
+        }
+         .action-btn.ready-to-submit:hover {
+            box-shadow: 0 6px 20px rgba(46, 125, 50, 0.3);
+        }
+
+        /* --- Estilos Modales --- */
+        .modal, .loader-overlay { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.7); justify-content: center; align-items: center; flex-direction: column; }
+        .modal-content { background-color: #fefefe; padding: 25px; border-radius: 15px; width: 90%; max-width: 450px; text-align: center; box-shadow: 0 5px 25px rgba(0,0,0,0.2); position: relative; }
+        .modal-content input[type="password"] { width: calc(100% - 30px); padding: 10px 15px; margin: 15px 0; border: 1px solid #ccc; border-radius: 8px; font-size: 1rem; }
+        .modal-content button { padding: 12px 25px; font-size: 1em; font-weight: 600; color: #fff; background-color: var(--accent-red); border: none; border-radius: 8px; cursor: pointer; } /* Color */
+        #result-image { width: 100%; border: 1px solid #ccc; border-radius: 8px; } 
+        .modal-instructions { margin: 15px 0; font-size: 1em; color: #333; line-height: 1.6; }
+        .modal-actions { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; }
+        .close-btn { color: #aaa; position: absolute; top: 10px; right: 20px; font-size: 35px; font-weight: bold; cursor: pointer; }
+        #whatsapp-link { display: inline-block; padding: 12px 25px; background-color: #25D366; color: white; text-decoration: none; border-radius: 8px; font-weight: 700; font-size: 1.1em; } 
+        /* Botón de descarga eliminado */
+        .loader-text { color: white; font-size: 1.2rem; margin-top: 15px; }
+        #results-card { position: absolute; left: -9999px; width: 400px; padding: 20px; background: white; border: 2px solid var(--accent-red); border-radius: 15px; font-family: 'Montserrat', sans-serif; color: #333; } /* Color */
+        #results-card h2 { color: var(--accent-red); text-align: center; font-size: 1.5rem; } /* Color */
+        #results-card p { margin: 8px 0; font-size: 1rem; }
+        #results-card .score { font-size: 2rem; font-weight: 700; color: var(--accent-red); text-align: center; margin-top: 15px; } /* Color */
+    </style>
+</head>
+<body>
+
+    <section id="hub-section">
+        <div class="hub-container">
+            <img src="https://placehold.co/400x100/b71c1c/ffffff?text=UDAL+Negocios" alt="Logo UDAL Negocios" class="header-logo">
+            <h1 class="hub-title">Examen de Economía de la Empresa</h1>
+            <p class="subtitle">Selecciona el examen para comenzar.</p>
+            <div class="exam-grid-container">
+                 <div class="exam-card area-negocios" data-exam-key="economia_empresa-v2" data-passwords='["riesgo"]'>
+                     <span>Economía de la Empresa</span><span class="version-tag">Parcial 2</span>
+                 </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="exam-economia_empresa-v2" class="exam-page"></section> 
+    
+    <div id="password-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn">&times;</span>
+            <h2>Acceso al Examen</h2>
+            <p>Ingresa la contraseña proporcionada por tu profesor.</p>
+            <input type="password" id="password-input" placeholder="Contraseña">
+            <button id="password-submit">Acceder</button>
+            <p id="password-error" style="display: none; color: var(--invalid-color);">Contraseña incorrecta.</p>
+        </div>
+    </div>
+    
+    <div id="results-modal" class="modal">
+         <div class="modal-content">
+            <span class="close-btn">&times;</span>
+             <img id="result-image" src="" alt="Tarjeta de Calificación"> 
+             <p class="modal-instructions">
+                 <b>Paso 1:</b> Guarda la imagen de tu calificación.<br>
+                 <b>Paso 2:</b> Envía tus resultados por WhatsApp.
+             </p>
+             <div class="modal-actions">
+                 <a id="whatsapp-link" href="#" target="_blank">Enviar Resultados</a> 
+                 </div>
+         </div>
+     </div>
+
+    <div id="loader" class="loader-overlay"><span class="loader-text">Procesando...</span></div>
+
+    <div id="results-card">
+         <h2>Resultado de Examen</h2>
+         <p><b>Materia:</b> <span id="card-materia"></span></p>
+         <p><b>Nombre:</b> <span id="card-nombre"></span></p>
+         <p><b>Licenciatura:</b> <span id="card-lic"></span></p>
+         <p><b>Grupo:</b> <span id="card-grupo"></span></p>
+         <div class="score">Calificación: <span id="card-score"></span></div>
+         <p><b>Tiempo Empleado:</b> <span id="card-time"></span></p>
+         <p><b>Fecha y Hora:</b> <span id="card-timestamp"></span></p>
+     </div>
+
+<script>
+    // --- LÓGICA DEL HUB Y NAVEGACIÓN ---
+    const hubSection = document.getElementById('hub-section');
+    const passModal = document.getElementById('password-modal');
+    const passwordInput = document.getElementById('password-input');
+    const passwordSubmit = document.getElementById('password-submit');
+    const passwordError = document.getElementById('password-error');
+    
+    let targetExamKey = '';
+    let currentPasswords = [];
+
+    // Función para barajar un array
+    function shuffleArray(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
+        return array;
+    }
+
+    // Función para randomizar opciones 
+    function randomizeOptions(questions) {
+        return questions.map(q => {
+            if (q.type === 'single') {
+                const correctAnswer = q.o[q.a];
+                const options = [...q.o];
+                const shuffledOptions = shuffleArray(options);
+                const newCorrectIndex = shuffledOptions.findIndex(opt => opt === correctAnswer);
+                return { ...q, o: shuffledOptions, a: newCorrectIndex };
+            }
+             if (q.type === 'multi') {
+                 const optionsWithValidity = q.o.map((option, index) => ({ option, isValid: q.v[index] }));
+                 const shuffledOptionsWithValidity = shuffleArray(optionsWithValidity);
+                 const shuffledOptions = shuffledOptionsWithValidity.map(item => item.option);
+                 const shuffledValidity = shuffledOptionsWithValidity.map(item => item.isValid);
+                 return { ...q, o: shuffledOptions, v: shuffledValidity };
+             }
+            return q; 
+        });
+    }
+
+    document.querySelectorAll('.exam-card').forEach(card => {
+        card.addEventListener('click', (e) => {
+            e.preventDefault(); 
+            targetExamKey = card.dataset.examKey;
+            try {
+                currentPasswords = JSON.parse(card.dataset.passwords);
+            } catch (err) {
+                currentPasswords = [];
+            }
+            
+            passwordInput.value = '';
+            passwordError.style.display = 'none';
+            passModal.style.display = 'flex';
+            passwordInput.focus();
+        });
+    });
+
+    passModal.querySelector('.close-btn').onclick = () => { passModal.style.display = 'none'; };
+
+    passwordSubmit.addEventListener('click', () => {
+        const enteredPassword = passwordInput.value.trim().toLowerCase();
+        if (currentPasswords.includes(enteredPassword) || enteredPassword === 'udal') {
+            passModal.style.display = 'none';
+            hubSection.style.display = 'none'; 
+            const examSection = document.getElementById(`exam-${targetExamKey}`);
+            if (examSection) {
+                 if (examData[targetExamKey]) {
+                      if (!examData[targetExamKey].originalQuestions) {
+                          examData[targetExamKey].originalQuestions = JSON.parse(JSON.stringify(examData[targetExamKey].questions));
+                      }
+                     examData[targetExamKey].questions = randomizeOptions(JSON.parse(JSON.stringify(examData[targetExamKey].originalQuestions)));
+                 } else {
+                      console.error("Datos del examen no encontrados");
+                      alert("Error: No se encontraron las preguntas para este examen.");
+                      hubSection.style.display = 'block'; 
+                      return;
+                 }
+                  initializeExam(examSection, targetExamKey); 
+                  examSection.style.display = 'block'; 
+            } else {
+                 console.error("Contenedor de examen no encontrado");
+                 alert("Error al cargar la interfaz del examen. Intenta de nuevo.");
+                 hubSection.style.display = 'block'; 
+            }
+        } else {
+            passwordError.style.display = 'block';
+            passwordInput.value = '';
+        }
+    });
+
+
+    passwordInput.addEventListener('keyup', (event) => { if (event.key === 'Enter') passwordSubmit.click(); });
+    window.addEventListener('click', (event) => { if (event.target === passModal) passModal.style.display = 'none'; });
+
+    // --- BASE DE DATOS DE PREGUNTAS (Solo Eco. Empresa) ---
+    const examData = {
+        'economia_empresa-v2': {
+            title: 'Parcial 2: Economía de la Empresa',
+            totalQuestions: 20,
+            questions: [
+                { type: 'single', q: 'En "Hell House LLC", el equipo realiza una visita inicial al hotel Abaddon antes de decidir alquilarlo. Esta acción corresponde a la etapa de ____ del proceso administrativo.', o: ['Control', 'Dirección', 'Planeación (Investigación)', 'Organización'], a: 2 },
+                { type: 'single', q: 'Al asignar tareas específicas (uno encarga del sonido, otra del vestuario, etc.), el equipo de "Hell House LLC" está en la etapa de:', o: ['Control', 'Dirección', 'Planeación', 'Organización'], a: 3 },
+                { type: 'single', q: 'El equipo de "Hell House LLC" tiene un presupuesto de $10,000. Gastan $8,000 en equipo y $2,000 en alquiler. Si sus ingresos totales son de $15,000, ¿cuál es su ROI (Retorno sobre la Inversión)? Fórmula: (Ganancia / Inversión) * 100', o: ['25%', '50%', '100%', '200%'], a: 1 },
+                { type: 'single', q: 'Si el equipo de "Hell House LLC" hubiera usado su dinero para invertir en la bolsa y ganar un 8% seguro, ese 8% representa su:', o: ['Riesgo Operativo', 'ROI', 'Costo de Oportunidad', 'Tasa de Retorno'], a: 2 },
+                { type: 'single', q: 'Un análisis FODA para "Hell House LLC" identificaría la ubicación del hotel abandonado como:', o: ['Una Fortaleza (auténtico) y una Debilidad (inseguro).', 'Solo una Oportunidad.', 'Solo una Amenaza.', 'Una Fortaleza y una Oportunidad.'], a: 0 },
+                { type: 'single', q: 'Existe una probabilidad del 20% de que un actor se lastime, con un costo de $500. ¿Cuál es el costo esperado anual del Riesgo Operativo?', o: ['$500', '$20', '$100', '$2,500'], a: 2 },
+                { type: 'single', q: 'La empresa tiene Activos Circulantes por $5,000 y Pasivos Circulantes por $2,500. ¿Cuál es su Razón de Liquidez?', o: ['0.5', '2.0', '1.5', '1.0'], a: 1 },
+                { type: 'single', q: 'Con Activos Circulantes de $5,000 (de los cuales $2,000 son inventario de disfraces) y Pasivos Circulantes de $2,500, ¿cuál es la Prueba del Ácido?', o: ['1.2', '0.8', '2.0', '1.5'], a: 0 },
+                { type: 'single', q: 'Un documento que muestra la jerarquía del equipo (quién es el líder, quién reporta a quién) es un:', o: ['Diagrama de Flujo', 'Manual de Puestos', 'Organigrama', 'Cronograma'], a: 2 },
+                { type: 'single', q: 'El equipo se reúne para proponer ideas sobre los sustos que incluirán en la atracción. Esta técnica se llama:', o: ['Arqueo de Caja', 'Checklist', 'Lluvia de Ideas (Brainstorming)', 'Investigación de Mercado'], a: 2 },
+                { type: 'single', q: 'El líder del proyecto usa walkie-talkies para hablar con su equipo durante la noche de apertura. Esto es un ejemplo de:', o: ['Establecimiento de un canal de comunicación en tiempo real.', 'Manual de operaciones.', 'Cronograma.', 'Encuesta de salida.'], a: 0 },
+                { type: 'single', q: 'Si el objetivo era vender 200 boletos y vendieron 150, ¿qué porcentaje de la meta alcanzaron?', o: ['50%', '150%', '25%', '75%'], a: 3 },
+                { type: 'single', q: 'Si vendieron 50 boletos en la primera hora de un evento de 4 horas, ¿cuál es su ritmo de venta por hora?', o: ['12.5 boletos/hora', '50 boletos/hora', '100 boletos/hora', '200 boletos/hora'], a: 1 },
+                { type: 'single', q: 'Un proyecto A tiene un rendimiento esperado del 12% y una desviación estándar del 5%. Un proyecto B tiene un rendimiento del 12% y una desviación del 8%. ¿Cuál es más riesgoso?', o: ['Proyecto A', 'Proyecto B', 'Ambos son iguales', 'No se puede saber'], a: 1 },
+                { type: 'single', q: 'El costo de los actores es de $2,000, el alquiler $2,000 y la electricidad $1,000. Si quieren una ganancia del 50% sobre los costos, ¿a cuánto deben ascender sus ingresos totales?', o: ['$5,000', '$10,000', '$7,500', '$2,500'], a: 2 },
+                { type: 'single', q: 'Un documento que describe paso a paso cómo debe actuar un empleado si un visitante se asusta demasiado es un:', o: ['Organigrama', 'Manual de Operaciones', 'Arqueo de Caja', 'FODA'], a: 1 },
+                { type: 'single', q: 'Al final de la noche, contar todo el dinero de la caja y compararlo con el registro de ventas se llama:', o: ['Presupuesto', 'Proyección de ventas', 'Arqueo de Caja', 'Cálculo de ROI'], a: 2 },
+                { type: 'single', q: 'El plan que detalla las fechas límite para construir cada parte de la atracción (ej. "Semana 1: Pintar paredes, Semana 2: Instalar luces") es un:', o: ['Cronograma (Diagrama de Gantt)', 'Diagrama de Flujo', 'Organigrama', 'Manual de Puestos'], a: 0 },
+                { type: 'single', q: 'La inversión en "Hell House" tiene un rendimiento esperado del 30% y una desviación estándar del 15%. La tasa libre de riesgo es del 5%. ¿Cuál es el Ratio de Sharpe?', o: ['1.66', '2.0', '0.5', '3.0'], a: 0 },
+                { type: 'single', q: 'El hecho de que pequeños fallos (una máscara mal puesta, una luz que parpadea) culminaran en un desastre total en "Hell House LLC" es un ejemplo extremo de fallo en la etapa de ____ del proceso administrativo.', o: ['Planeación', 'Organización', 'Dirección', 'Control'], a: 3 }
+            ]
+        }
+    };
+
+     // Copia inicial de preguntas originales
+      for (const key in examData) {
+          if (examData.hasOwnProperty(key) && examData[key].questions) {
+              examData[key].originalQuestions = JSON.parse(JSON.stringify(examData[key].questions));
+          }
+      }
+
+
+    // --- LÓGICA DE CADA EXAMEN (Función Universal) ---
+    function initializeExam(examSection, examKey) { 
+        examSection.innerHTML = ''; 
+        const examDiv = document.createElement('div');
+        examDiv.id = `exam-${examKey}`; 
+        examDiv.classList.add('exam-page'); 
+        examDiv.style.display = 'block'; 
+        examSection.appendChild(examDiv);
+
+        examDiv.innerHTML = generateExamHTML(examKey); 
+
+        const startTime = new Date();
+        let score = 0;
+        const data = examData[examKey];
+        const totalQuestions = data.totalQuestions;
+        let isGraded = false;
+
+        const progressBar = examDiv.querySelector('.progress-bar');
+        const actionBtn = examDiv.querySelector('.action-btn');
+        const questionCards = examDiv.querySelectorAll('.question-card'); 
+
+        function updateProgressBar() {
+            let answeredCount = 0;
+            questionCards.forEach(card => {
+                if (card.dataset.answered === 'true') {
+                    answeredCount++;
+                }
+            });
+            const percentage = totalQuestions > 0 ? (answeredCount / totalQuestions) * 100 : 0;
+            progressBar.style.width = percentage + '%';
+            progressBar.textContent = `${Math.round(percentage)}%`;
+        }
+        
+        updateProgressBar(); 
+
+         // --- Lógica para preguntas de opción múltiple (single/multi) ---
+         examDiv.querySelectorAll('.options').forEach(container => {
+             container.addEventListener('click', function(event) {
+                 if (isGraded || !event.target.classList.contains('option')) return;
+                 const card = this.closest('.question-card');
+                 const wasAnswered = card.dataset.answered === 'true'; 
+
+                 const previouslySelected = this.querySelector('.option.selected');
+                 if (previouslySelected) previouslySelected.classList.remove('selected');
+                 
+                 event.target.classList.add('selected');
+                 card.classList.remove('unanswered-highlight');
+                 
+                 if (!wasAnswered) { 
+                     card.dataset.answered = 'true';
+                     updateProgressBar();
+                 }
+             });
+         });
+
+        // --- Lógica del Botón de Acción (Calificar/Finalizar) ---
+        actionBtn.addEventListener('click', function() {
+            if (!isGraded) {
+                // --- FASE DE CALIFICACIÓN ---
+                 examDiv.querySelectorAll('.question-card').forEach(card => card.classList.remove('unanswered-highlight'));
+                
+                 let allAnswered = true;
+                 questionCards.forEach(card => {
+                      if (card.dataset.answered !== 'true') {
+                          allAnswered = false;
+                          card.classList.add('unanswered-highlight');
+                      }
+                 });
+
+                if (!allAnswered) {
+                    alert('Por favor, responde todas las preguntas antes de calificar.');
+                    return;
+                }
+
+                score = 0; 
+                
+                 questionCards.forEach((card, physicalIndex) => {
+                     const questionData = data.questions[physicalIndex]; 
+                     const originalQuestionData = data.originalQuestions[physicalIndex]; 
+
+                     if (!questionData) return; 
+
+                     if (questionData.type === 'multi' || questionData.type === 'single') {
+                         const container = card.querySelector('.options');
+                         const selectedOption = container.querySelector('.option.selected');
+                          if (!selectedOption) return; 
+
+                         if (questionData.type === 'multi') {
+                             const selectedIndex = Array.from(container.children).indexOf(selectedOption);
+                             if (questionData.v[selectedIndex] === true) { 
+                                 score++;
+                                 selectedOption.classList.add('valid');
+                             } else {
+                                 selectedOption.classList.add('invalid');
+                                 container.querySelectorAll('.option').forEach((opt, optIdx) => {
+                                     if (questionData.v[optIdx] === true) opt.classList.add('valid');
+                                 });
+                             }
+                         } else { // single
+                             if (selectedOption.dataset.correct === 'true') { 
+                                 score++;
+                                 selectedOption.classList.add('valid');
+                             } else {
+                                 selectedOption.classList.add('invalid');
+                                 const correctOption = container.querySelector('[data-correct="true"]');
+                                 if (correctOption) correctOption.classList.add('valid');
+                             }
+                         }
+                     } 
+                 });
+
+
+                isGraded = true;
+                this.textContent = 'Finalizar y Ver Calificación';
+                this.classList.add('ready-to-submit');
+                examDiv.querySelectorAll('.options').forEach(el => {
+                     el.style.pointerEvents = 'none'; 
+                 });
+
+            } else {
+                // --- FASE DE FINALIZACIÓN Y ENVÍO ---
+                const loader = document.getElementById('loader');
+                loader.style.display = 'flex';
+
+                const studentName = examDiv.querySelector('.nombre').value || "No especificado";
+                const studentLic = examDiv.querySelector('.licenciatura').value || "No especificada";
+                const studentGroup = examDiv.querySelector('.grupo').value || "No especificado";
+                const studentMateria = examDiv.querySelector('.materia').value || "No especificada";
+                
+                let finalScore = (score / totalQuestions) * 10; 
+                if (finalScore > 10) finalScore = 10;
+                if (finalScore < 0) finalScore = 0; 
+
+
+                const now = new Date();
+                const timestamp = now.toLocaleString('es-MX', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true });
+                const endTime = new Date();
+                const timeDiff = endTime - startTime;
+                const minutes = Math.floor(timeDiff / 60000);
+                const seconds = ((timeDiff % 60000) / 1000).toFixed(0);
+                const timeTakenString = `${minutes} min, ${seconds} seg`;
+
+                const resultsCard = document.getElementById('results-card');
+                 resultsCard.querySelector('#card-materia').textContent = studentMateria;
+                 resultsCard.querySelector('#card-nombre').textContent = studentName;
+                 resultsCard.querySelector('#card-lic').textContent = studentLic;
+                 resultsCard.querySelector('#card-grupo').textContent = studentGroup;
+                 resultsCard.querySelector('#card-score').textContent = `${finalScore.toFixed(1)} / 10.0`;
+                 resultsCard.querySelector('#card-time').textContent = timeTakenString;
+                 resultsCard.querySelector('#card-timestamp').textContent = timestamp;
+                
+                const phoneNumber = "522221158614"; 
+                const message = `*Resultado de Examen de ${studentMateria}*:\n\n*Nombre:* ${studentName}\n*Licenciatura:* ${studentLic}\n*Grado y Grupo:* ${studentGroup}\n\n*Calificación Obtenida:* ${finalScore.toFixed(1)} / 10.0\n*Tiempo Empleado:* ${timeTakenString}\n*Fecha y Hora:* ${timestamp}`;
+                const whatsappLink = document.getElementById('whatsapp-link');
+                whatsappLink.href = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
+
+                 // Botón de descarga de estudiante ELIMINADO de la lógica
+                 // const downloadBtnStudent = document.getElementById('download-student-copy');
+                 // downloadBtnStudent.dataset.examKey = examKey; 
+                 // downloadBtnStudent.onclick = () => { ... };
+
+                setTimeout(() => {
+                    html2canvas(resultsCard, { scale: 2 }).then(canvas => {
+                        document.getElementById('result-image').src = canvas.toDataURL('image/png');
+                        loader.style.display = 'none';
+                        document.getElementById('results-modal').style.display = "flex";
+                    });
+                }, 500);
+
+                this.style.display = 'none'; 
+            }
+        });
+    }
+
+    // --- GENERACIÓN DINÁMICA DE PLANTILLAS DE EXAMEN ---
+    function generateExamHTML(examKey) {
+        const data = examData[examKey];
+        if (!data) return '<div>Error: Examen no encontrado.</div>';
+        
+        let baseHTML = `
+            <div class="main-container">
+                <div class="header"><h1>${data.title}</h1></div>
+                <div class="student-info">
+                     <input type="text" class="nombre" placeholder="Nombre Completo">
+                     <input type="text" class="licenciatura" placeholder="Licenciatura o Carrera"> 
+                     <input type="text" class="grupo" placeholder="Grado y Grupo">
+                     <input type="text" class="materia" value="${data.title}" readonly>
+                </div>
+                <div class="progress-container"><div class="progress-bar"></div></div>
+                <div class="exam-container">
+                    {{QUESTIONS}}
+                </div>
+                <button class="action-btn">Calificar Examen</button>
+            </div>`;
+        
+        let questionsHTML = '';
+        data.questions.forEach((item, index) => { // Usar preguntas randomizadas
+            let contentHTML = ''; 
+             if (item.type === 'multi' || item.type === 'single') {
+                 let optionsHTML = '';
+                 item.o.forEach((opt, optIndex) => {
+                     if (item.type === 'multi') {
+                         optionsHTML += `<div class="option" data-validity="${item.v[optIndex]}">${String.fromCharCode(65 + optIndex)}) ${opt}</div>`;
+                     } else { 
+                         optionsHTML += `<div class="option" ${optIndex === item.a ? 'data-correct="true"' : ''}>${String.fromCharCode(65 + optIndex)}) ${opt}</div>`;
+                     }
+                 });
+                  contentHTML = `<div class="options">${optionsHTML}</div>`;
+             } 
+
+            questionsHTML += `
+                <div class="question-card" data-question-type="${item.type}" data-answered="false">
+                     <div class="question-header">Pregunta ${index + 1}</div>
+                     <p class="question-text">${item.q}</p>
+                     ${contentHTML} 
+                </div>`;
+        });
+
+        return baseHTML.replace('{{QUESTIONS}}', questionsHTML);
+    }
+
+     // Función de Descarga ELIMINADA
+     // function generateAndDownloadExamFile(...) { ... }
+
+    // --- Lógica del modal de resultados ---
+    const resultsModalInstance = document.getElementById('results-modal');
+    if (resultsModalInstance) {
+        resultsModalInstance.querySelector('.close-btn').onclick = () => { resultsModalInstance.style.display = "none"; };
+        window.addEventListener('click', (event) => { if (event.target == resultsModalInstance) resultsModalInstance.style.display = "none"; });
+    }
+
+</script>
+</body>
+</html>
